@@ -1,8 +1,11 @@
 package com.z.websocket.server;
 
+import com.alibaba.fastjson.JSONObject;
+import com.z.websocket.view.MessageData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -66,11 +69,10 @@ public class WebSocketServer {
      * @param msg 客户端发送过来的消息
      */
     @OnMessage
-    public void onMessage(String msg, Session session) {
-        log.info("收到来自窗口" + sid + "的信息:" + msg);
-        webSocketSet.forEach(socket -> {
-            socket.sendMessage(msg);
-        });
+    public void onMessage(String msgData, Session session) {
+        MessageData data = JSONObject.parseObject(msgData, MessageData.class);
+        log.info("收到来自窗口" + sid + "的信息:" + data.getMessage());
+        sendInfo(data.getMessage(), data.getToUserId());
     }
 
     /**
@@ -97,12 +99,12 @@ public class WebSocketServer {
     /**
      * 群发自定义消息
      */
-    public static void sendInfo(String message, @PathParam("sid") String sid) throws IOException {
+    public static void sendInfo(String message, @PathParam("sid") String sid) {
         System.out.println("推送消息到窗口" + sid + "，推送内容:" + message);
 
         for (WebSocketServer item : webSocketSet) {
             //为null则全部推送
-            if (sid == null || item.sid.equals(sid)) {
+            if (StringUtils.isEmpty(sid) || item.sid.equals(sid)) {
                 item.sendMessage(message);
             }
         }

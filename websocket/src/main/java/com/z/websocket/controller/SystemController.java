@@ -28,13 +28,9 @@ public class SystemController {
     @RequestMapping("/socket/push/{cid}")
     public Map pushToWeb(@PathVariable String cid, String message) {
         Map<String,Object> result = new HashMap<>();
-        try {
-            WebSocketServer.sendInfo(message, cid);
-            result.put("code", cid);
-            result.put("msg", message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        WebSocketServer.sendInfo(message, cid);
+        result.put("code", cid);
+        result.put("msg", message);
         return result;
     }
 }
